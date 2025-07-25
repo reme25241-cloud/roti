@@ -447,6 +447,8 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
 from .models import PendingPurchaseRequest, BoughtProduct
+from django.core.mail import send_mail
+from django.conf import settings
 
 @login_required
 def confirm_purchase(request, request_id):
@@ -479,14 +481,28 @@ def confirm_purchase(request, request_id):
         price_per_item=product.cost,
         total_price=product.cost * purchase_request.cart.quantity,
         is_returned=False,
-        # payment_method=purchase_request.cart.payment_method,
-        # shipping_address=purchase_request.cart.shipping_address
     )
 
     # Remove cart entry
     purchase_request.cart.delete()
 
-    messages.success(request, "Purchase confirmed and marked as sold.")
+    # ✅ Send confirmation email to buyer
+    buyer_email = purchase_request.user.email
+    send_mail(
+        subject='Your Purchase Has Been Confirmed 🎉',
+        message=f'Dear {purchase_request.user.username},\n\n'
+                f'Thank you for your purchase of "{product.title}".\n'
+                f'The seller has confirmed the order and the product is now marked as sold.\n\n'
+                f'Product: {product.title}\n'
+                f'Quantity: {purchase_request.cart.quantity}\n'
+                f'Total Amount: ₹{product.cost * purchase_request.cart.quantity}\n\n'
+                f'Thank you for using CampusSwap!',
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[buyer_email],
+        fail_silently=False,
+    )
+
+    messages.success(request, "Purchase confirmed and buyer notified via email.")
     return redirect('purchase_requests')
 
 # ----------------------------
