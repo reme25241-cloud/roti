@@ -141,7 +141,7 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'reme25241@gmail.com'  # Replace with your email
-EMAIL_HOST_PASSWORD = 'kqyj ciyn dljr ggyz'  # Replace with your email password
+EMAIL_HOST_PASSWORD = 'kqyj ciyn dljr ggyz'  # Replace with your email password or app-specific password
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 

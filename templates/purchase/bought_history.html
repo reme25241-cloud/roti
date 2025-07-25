@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}Bought History{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="text-center mb-4">
+        <h2 class="fw-bold">🛒 Your Purchased Products</h2>
+    </div>
+
+    {% if bought_products %}
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
+            {% for item in bought_products %}
+                <div class="col">
+                    <div class="card h-100 shadow border-0 rounded-4">
+                        <img src="{{ item.product.image.url }}" 
+                             class="card-img-top rounded-top-4" 
+                             alt="{{ item.product.title }}" 
+                             style="height: 200px; object-fit: cover;">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">{{ item.product.title }}</h5>
+                            <p class="card-text text-success fw-semibold">₹{{ item.product.cost }}</p>
+                            <p class="text-muted small">Purchased on: {{ item.purchased_at|date:"M d, Y" }}</p>
+                            <!-- <div class="mt-auto">
+                                <a href="{% url 'return_product' item.product.id %}" 
+                                   class="btn btn-outline-danger btn-sm w-100 rounded-pill">
+                                    Return Product
+                                </a>
+                            </div> -->
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info text-center mt-4 rounded-pill shadow-sm">
+            <i class="bi bi-info-circle-fill"></i> No purchases found.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
