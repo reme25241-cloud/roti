@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load cart_extras %}
+
+{% block title %}My Cart{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h3 class="mb-4 text-center">
+        🛒 <span class="text-primary">My Cart</span>
+    </h3>
+
+    {% if cart_items %}
+        <div class="row g-4">
+            {% for item in cart_items %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0 rounded-4">
+                    <img src="{{ item.product.image.url }}" class="card-img-top rounded-top-4" 
+                         alt="{{ item.product.title }}" style="height: 220px; object-fit: cover;">
+
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title text-primary">{{ item.product.title }}</h5>
+                        <p class="mb-1"><strong>Price:</strong> ₹{{ item.product.cost }}</p>
+                        <p class="mb-1"><strong>Quantity:</strong> {{ item.quantity }}</p>
+                        <p class="mb-3"><strong>Total:</strong> ₹{{ item.quantity|multiply:item.product.cost }}</p>
+
+                        <form method="POST" action="{% url 'remove_from_cart' item.id %}" class="mt-auto">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-danger w-100">
+                                <i class="bi bi-trash3-fill"></i> Remove
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Summary Section -->
+        <div class="row mt-5 justify-content-center">
+            <div class="col-md-6 col-lg-4">
+                <div class="card shadow-lg rounded-4 p-4 border-0">
+                    <h5 class="mb-3">🧾 <strong>Order Summary</strong></h5>
+                    <p><strong>Total Items:</strong> {{ total_items }}</p>
+                    <p><strong>Total Amount:</strong> <span class="text-success fw-bold">₹{{ total_amount }}</span></p>
+
+                    {% if cart and cart.id %}
+                        <a href="{% url 'proceed_payment' %}" class="btn btn-success w-100 mt-3">
+                            <i class="bi bi-wallet2 me-1"></i> Proceed to Payment
+                        </a>
+                    {% else %}
+                        <p class="text-danger mt-3">No cart available for payment.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="alert alert-info text-center shadow-sm rounded-4 mt-4">
+            <i class="bi bi-cart-x fs-4"></i><br>
+            Your cart is empty. <a href="{% url 'product_list' %}" class="fw-semibold text-decoration-none">Continue shopping</a>.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
