@@ -16,7 +16,18 @@
                             <li><strong>Qty:</strong> {{ item.quantity }}</li>
                             <li><strong>Price:</strong> ₹{{ item.price_per_item }}</li>
                             <li><strong>Total:</strong> ₹{{ item.total_price }}</li>
-                            <li><strong>Seller:</strong> {{ item.seller.username if item.seller else "N/A" }}</li>
+                            <li><strong>Seller:</strong>
+                                {% if item.seller %}
+                                    {{ item.seller.username }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </li>
+
+
+
+
+
                             <li><strong>Payment:</strong> {{ item.payment_method }}</li>
                             <li><strong>Address:</strong><br>
                                 <span class="text-muted">{{ item.shipping_address|linebreaksbr }}</span>
