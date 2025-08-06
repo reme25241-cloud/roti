@@ -14,7 +14,7 @@ urlpatterns = [
     path('login/', auth_views.LoginView.as_view(), name='login'),
     
     path('profile/', login_required(profile_view), name='profile'),
-    path('profile/edit/', edit_profile, name='edit_profile'),
+    path('profile/edit/', edit_profile_view, name='edit_profile'),
     
     path('password/', auth_views.PasswordChangeView.as_view(template_name='registration/change_password.html', success_url='/dashboard/'), name='change_password'),
 

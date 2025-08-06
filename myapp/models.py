@@ -17,7 +17,7 @@ class Profile(models.Model):
     qr_code_image = models.ImageField(upload_to='qr_codes/', blank=True, null=True)  
 
     def __str__(self):
-        return self.name
+        return self.name or self.user.username
 
 from django.conf import settings
 

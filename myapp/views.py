@@ -34,6 +34,46 @@ from django.contrib.auth import login
 from django.contrib import messages
 from .forms import UserSignupForm  # Make sure this matches your form name
 
+# def signup_view(request):
+#     if request.method == 'POST':
+#         form = UserSignupForm(request.POST)
+#         if form.is_valid():
+#             user = form.save()
+#             login(request, user)
+#             messages.success(request, "Signup successful. Welcome!")
+#             return redirect('dashboard')  # Change as per your URL name
+#         else:
+#             messages.error(request, "Please correct the errors below.")
+#     else:
+#         form = UserSignupForm()
+
+#     return render(request, 'registration/signup.html', {'form': form})
+
+# views.py
+from django.shortcuts import render, redirect
+from django.contrib.auth import login
+from django.contrib import messages
+from .forms import UserSignupForm
+
+def signup_view(request):
+    if request.method == 'POST':
+        form = UserSignupForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)  # Automatically log in after signup
+            messages.success(request, "Signup successful. Welcome!")
+            return redirect('base')  
+    else:
+        form = UserSignupForm()
+    return render(request, 'registration/signup.html', {'form': form})
+
+
+# views.py
+from django.contrib.auth import login
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .forms import UserSignupForm
+
 def signup_view(request):
     if request.method == 'POST':
         form = UserSignupForm(request.POST)
@@ -41,14 +81,13 @@ def signup_view(request):
             user = form.save()
             login(request, user)
             messages.success(request, "Signup successful. Welcome!")
-            return redirect('dashboard')  # Change as per your URL name
+            return redirect('dashboard')
         else:
             messages.error(request, "Please correct the errors below.")
     else:
         form = UserSignupForm()
 
     return render(request, 'registration/signup.html', {'form': form})
-
 
 # Handle user logout
 def logout_view(request):
@@ -65,23 +104,16 @@ from django.contrib.auth.decorators import login_required
 from .forms import ProfileForm
 
 @login_required
-def edit_profile(request):
-    try:
-        profile = request.user.profile
-    except Profile.DoesNotExist:
-        profile = Profile.objects.create(user=request.user)
-
+def edit_profile_view(request):
     if request.method == 'POST':
-        form = ProfileForm(request.POST, request.FILES, instance=profile)
+        form = EditUserForm(request.POST, instance=request.user)
         if form.is_valid():
             form.save()
             return redirect('profile')
     else:
-        form = ProfileForm(instance=profile)
-
+        form = EditUserForm(instance=request.user)
+    
     return render(request, 'account/edit_profile.html', {'form': form})
-
-
 
 
 # dashboard
@@ -381,13 +413,70 @@ def proceed_payment(request):
 # ----------------------------
 # CHECKOUT & PURCHASE REQUESTS
 # ----------------------------
+
+
+# @login_required
+# def checkout(request):
+#     cart_items = Cart.objects.filter(user=request.user)
+#     for item in cart_items:
+#         PendingPurchaseRequest.objects.create(buyer=request.user, product=item.product, status='Pending')
+#     cart_items.delete()
+#     return redirect('purchase_requests')
+
+from django.core.mail import send_mail
+from django.conf import settings
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect
+from .models import Cart, PendingPurchaseRequest
+
 @login_required
 def checkout(request):
     cart_items = Cart.objects.filter(user=request.user)
+    order_details = []
+    
     for item in cart_items:
-        PendingPurchaseRequest.objects.create(buyer=request.user, product=item.product, status='Pending')
+        purchase = PendingPurchaseRequest.objects.create(
+            buyer=request.user,
+            product=item.product,
+            status='Pending',
+            payment_proceeded=False,
+            seller_confirmed=False,
+            buyer_received=False,
+            cart_id=item.id,
+            user_id=request.user.id
+        )
+        order_details.append(f"- {item.product.name} (₹{item.product.price})")
+
+    if order_details:
+        subject = "RotiApp Order Confirmation"
+        message = (
+            f"Dear {request.user.username},\n\n"
+            f"Thank you for your order! The following items have been placed for purchase:\n"
+            f"{chr(10).join(order_details)}\n\n"
+            "We will notify you once the seller confirms your request.\n\n"
+            "Regards,\nRotiApp Team"
+        )
+
+        admin_subject = f"New Order Placed by {request.user.username}"
+        admin_message = (
+            f"A new order has been placed by {request.user.username} ({request.user.email}).\n\n"
+            f"Order Details:\n{chr(10).join(order_details)}\n\n"
+            "Check the admin panel to manage the request."
+        )
+
+        admin_emails = list(User.objects.filter(is_superuser=True).values_list('email', flat=True))
+
+        # Send to user
+        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [request.user.email])
+
+        # Send to admin(s)
+        if admin_emails:
+            send_mail(admin_subject, admin_message, settings.DEFAULT_FROM_EMAIL, admin_emails)
+
+
     cart_items.delete()
     return redirect('purchase_requests')
+
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render

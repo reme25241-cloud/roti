@@ -11,13 +11,29 @@ class BootstrapFormMixin:
             existing_class = field.widget.attrs.get('class', '')
             field.widget.attrs['class'] = existing_class + ' form-control'
 
-class UserSignupForm(UserCreationForm, BootstrapFormMixin):
+# forms.py
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
+from django import forms
+
+class UserSignupForm(UserCreationForm):
     email = forms.EmailField(required=True)
 
     class Meta:
         model = User
         fields = ['username', 'email', 'password1', 'password2']
 
+class EditUserForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['username', 'first_name', 'last_name', 'email']
+        widgets = {
+            'username': forms.TextInput(attrs={'class': 'form-control'}),
+            'first_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+        }
+        
 class ProfileForm(forms.ModelForm, BootstrapFormMixin):
     class Meta:
         model = Profile
