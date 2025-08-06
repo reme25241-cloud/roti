@@ -134,15 +134,15 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # settings.py
 LOGIN_URL = 'login'
 LOGOUT_REDIRECT_URL = 'login'
-LOGIN_REDIRECT_URL = 'dashboard'
+LOGIN_REDIRECT_URL = 'base'
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'reme25241@gmail.com'  # Replace with your email
-EMAIL_HOST_PASSWORD = 'kqyj ciyn dljr ggyz'  # Replace with your email password or app-specific password
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+EMAIL_HOST_PASSWORD = 'kqyj ciyn dljr ggyz'  # Replace with your email password 
+DEFAULT_FROM_EMAIL = 'swatikoti25@gmail.com'
 
 
 # Default primary key field type
